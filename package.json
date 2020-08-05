@@ -1,0 +1,27 @@
+{
+  "name": "node.js-express-mongodb-rest-api",
+  "version": "1.0.0",
+  "description": "Node.js-Express-MongoDB-Rest-Api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Commondev73/Node.js-Express-MongoDB-Rest-Api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Commondev73/Node.js-Express-MongoDB-Rest-Api/issues"
+  },
+  "homepage": "https://github.com/Commondev73/Node.js-Express-MongoDB-Rest-Api#readme",
+  "dependencies": {
+    "@hapi/joi": "^17.1.1",
+    "bcrypt": "^5.0.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.27",
+    "nodemon": "^2.0.4"
+  }
+}
