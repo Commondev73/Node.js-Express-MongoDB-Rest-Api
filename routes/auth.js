@@ -12,8 +12,10 @@ const generateAccessToken = user => {
 }
 
 const generateRefreshToken = user => {
-  return  jwt.sign({_id:user._id , name: user.name},process.env.REFRESH_TOKEN_SECRET);
+  return  jwt.sign({_id:user._id , name: user.name},process.env.REFRESH_TOKEN_SECRET,);
 }
+
+let RefreshToken = []
 
 router.post("/register", async (req, res) => {
   try {
@@ -41,6 +43,19 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.post("/token/refresh",async (req,res) => {
+  try {
+    const { refreshToken } = req.body;
+    if(!refreshToken) return res.sendStatus(401);
+    if(!RefreshToken.includes(refreshToken)) return res.sendStatus(403)
+    const user = jwt.verify(refreshToken,process.env.REFRESH_TOKEN_SECRET)
+    const accessToken = generateAccessToken(user)
+    res.json({accessToken: accessToken})
+  } catch (error) {
+    res.status(400).send(error);
+  }
+})
+
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -56,6 +71,7 @@ router.post("/login", async (req, res) => {
 
     const accessToken = generateAccessToken(user)
     const refreshToken = generateRefreshToken(user)
+    RefreshToken.push(refreshToken)
     res.json({accessToken: accessToken , refreshToken : refreshToken})
 
   } catch (error) {
