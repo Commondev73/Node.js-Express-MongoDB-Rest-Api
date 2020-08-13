@@ -79,4 +79,10 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.delete("/logout",async(req,res)=>{
+  const {refreshToken} = req.body;
+  RefreshToken  = RefreshToken.filter(token => token !== refreshToken)
+  res.sendStatus(204);
+})
+
 module.exports = router;
