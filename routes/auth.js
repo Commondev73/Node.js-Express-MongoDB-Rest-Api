@@ -12,7 +12,7 @@ const generateAccessToken = user => {
 }
 
 const generateRefreshToken = user => {
-  return  jwt.sign({_id:user._id , name: user.name},process.env.REFRESH_TOKEN_SECRET,);
+  return  jwt.sign({_id:user._id , name: user.name},process.env.REFRESH_TOKEN_SECRET,{ expiresIn:"7d" });
 }
 
 let RefreshToken = []
@@ -50,7 +50,8 @@ router.post("/token/refresh",async (req,res) => {
     if(!RefreshToken.includes(refreshToken)) return res.sendStatus(403)
     const user = jwt.verify(refreshToken,process.env.REFRESH_TOKEN_SECRET)
     const accessToken = generateAccessToken(user)
-    res.json({accessToken: accessToken})
+    // const decoded = jwt.decode(refreshToken);
+    res.json({accessToken: accessToken })
   } catch (error) {
     res.status(400).send(error);
   }
