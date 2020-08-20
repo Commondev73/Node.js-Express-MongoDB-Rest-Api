@@ -8,7 +8,7 @@ const registerValidation = require("../validation/register");
 const loginValidation = require("../validation/login");
 
 const generateAccessToken = user => {
-  return  jwt.sign({_id:user._id , name: user.name},process.env.ACCESS_TOKEN_SECRET,{ expiresIn:"60s" });
+  return  jwt.sign({_id:user._id , name: user.name},process.env.ACCESS_TOKEN_SECRET,{ expiresIn:"15m" });
 }
 
 const generateRefreshToken = user => {
@@ -22,10 +22,10 @@ router.post("/register", async (req, res) => {
     const { name, username, password } = req.body;
 
     const { error, value } = registerValidation.validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(400).json(error.details[0].message);
 
     const usernameExist = await User.findOne({ username: username });
-    if (usernameExist) return res.status(400).send("username already exists");
+    if (usernameExist) return res.status(400).json("username already exists");
 
     const salt = bcrypt.genSaltSync(10);
     const hashPassword = bcrypt.hashSync(password, salt);
