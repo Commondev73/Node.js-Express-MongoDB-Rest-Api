@@ -6,8 +6,7 @@ const authenticateToken = (req, res, next) => {
     if (!token) return res.status(401).json("Access Denied");
 
     const verified = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    // req.user = verified;
-    // console.log(verified);
+    res.locals.decoded = verified;
     next();
   } catch (error) {
     res.status(400).json(error.message);
