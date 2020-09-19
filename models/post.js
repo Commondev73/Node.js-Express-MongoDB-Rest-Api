@@ -1,3 +1,4 @@
+const { array } = require("@hapi/joi");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
@@ -13,6 +14,9 @@ const postSchema = new Schema(
       type: String,
       min: 3,
       required: true,
+    },
+    image: {
+      type: Array,
     },
     userID: {
       type: String,

@@ -5,8 +5,12 @@ require("./db");
 const authRouter = require("./routes/auth");
 const postRouter = require("./routes/post");
 
+// Open folder
+app.use("/uploads", express.static(__dirname + "/uploads"));
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+// app.use(multer());
 
 // Route
 app.use("/api/user", authRouter);
