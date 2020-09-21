@@ -8,7 +8,7 @@ const registerValidation = require("../validation/register");
 const loginValidation = require("../validation/login");
 
 const generateAccessToken = user => {
-  return  jwt.sign({_id:user._id , name: user.name},process.env.ACCESS_TOKEN_SECRET,{ expiresIn:"15m" });
+  return  jwt.sign({_id:user._id , name: user.name},process.env.ACCESS_TOKEN_SECRET,{ expiresIn:"7d" });
 }
 
 const generateRefreshToken = user => {

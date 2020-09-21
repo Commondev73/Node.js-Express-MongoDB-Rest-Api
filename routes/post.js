@@ -5,6 +5,10 @@ const Post = require("../models/post");
 const postValidation = require("../validation/post");
 const authenticateToken = require("../middleware/authenticateToken");
 const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
+const _ = require("lodash");
+const { Buffer } = require("buffer");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -73,8 +77,12 @@ router.post("/add", authenticateToken, (req, res) => {
     image(req, res, async (err) => {
       const { decoded } = res.locals;
       const { topic, detail } = req.body;
-      
-      const image = req.files.map((file) => ({imageName:file.filename , url:file.path }));
+
+      const image = req.files.map((file) => ({
+        imageName: file.filename,
+        url:file.path,
+      }));
+
       if (err) return res.status(400).json({ error: err.message });
 
       const { error, value } = postValidation.validate(req.body);
@@ -148,4 +156,16 @@ router.post("/upload", async (req, res) => {
   }
 });
 
+let someArray = [
+  { imageName: "Kristian", url: "2,5,10" },
+  { imageName: "John", url: "1,19,26,96" },
+  { imageName: "tee", url: "2,58,160" },
+  { imageName: "Felix", url: "1,19,26,96" },
+];
+
+const deleteImage = [{ imageName: "Kristian"},{ imageName: "tee"}];
+const results = someArray.filter((image) => image.imageName !== "Kristian");
+var filteredArray = _.differenceBy(someArray, deleteImage, 'imageName');
+console.log("filtered", results);
+console.log("filteredArray", filteredArray);
 module.exports = router;
