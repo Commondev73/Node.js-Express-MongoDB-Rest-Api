@@ -22,7 +22,7 @@ const postSchema = new Schema(
         },
         url: {
           type: String,
-        },
+        }
       },
     ],
     userID: {

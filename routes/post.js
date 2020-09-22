@@ -6,9 +6,8 @@ const postValidation = require("../validation/post");
 const authenticateToken = require("../middleware/authenticateToken");
 const multer = require("multer");
 const fs = require("fs");
-const path = require("path");
+const path = require("path"); // use for fix no such file or directory
 const _ = require("lodash");
-const { Buffer } = require("buffer");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -32,7 +31,7 @@ const fileFilter = (req, file, cb) => {
   ) {
     cb(null, true);
   } else {
-    cb(null, false);
+    // cb(null, false);
     return cb(new Error("Only .png, .jpg and .jpeg format allowed!"), false);
   }
 };
@@ -78,10 +77,12 @@ router.post("/add", authenticateToken, (req, res) => {
       const { decoded } = res.locals;
       const { topic, detail } = req.body;
 
-      const image = req.files.map((file) => ({
-        imageName: file.filename,
-        url:file.path,
-      }));
+      const image = req.files
+        ? req.files.map((file) => ({
+            imageName: file.filename,
+            url: file.path,
+          }))
+        : [];
 
       if (err) return res.status(400).json({ error: err.message });
 
@@ -91,7 +92,7 @@ router.post("/add", authenticateToken, (req, res) => {
       const post = new Post({
         topic: topic,
         detail: detail,
-        image: req.files ? image : [],
+        image: image,
         userID: decoded._id,
       });
 
@@ -103,22 +104,51 @@ router.post("/add", authenticateToken, (req, res) => {
   }
 });
 
-router.patch("/:id", authenticateToken, async (req, res) => {
+router.patch("/:id", authenticateToken, (req, res) => {
   try {
-    const { decoded } = res.locals;
+    image(req, res, async (err) => {
+      const { decoded } = res.locals;
+      const { topic, detail, deleteImage } = req.body;
 
-    const PostID = await Post.findById(req.params.id);
-    if (PostID.userID !== decoded._id) return res.sendStatus(401);
+      const PostID = await Post.findById(req.params.id);
+      if (PostID.userID !== decoded._id) return res.sendStatus(401);
 
-    const { error, value } = postValidation.validate(req.body);
-    if (error) return res.status(400).json(error.details[0].message);
+      const { error, value } = postValidation.validate(req.body);
+      if (error) return res.status(400).json(error.details[0].message);
 
-    const updateObject = req.body;
-    const updatePost = await Post.updateOne(
-      { _id: req.params.id },
-      { $set: updateObject }
-    );
-    res.json(updatePost);
+      const newImage = req.files
+        ? req.files.map((file) => ({
+            imageName: file.filename,
+            url: file.path,
+          }))
+        : [];
+
+      const deleteFile = (files) => {
+        files.map((file) => {
+          const pathFile = path.join(__dirname, `../uploads/${file.imageName}`); // use path for fix no such file or directory
+          if (fs.existsSync(pathFile)) fs.unlinkSync(pathFile);
+        });
+      };
+      if (deleteImage) deleteFile(deleteImage);
+
+      let updateImage = () => {
+        const data = [...PostID.image, ...newImage];
+        const result = _.differenceBy(data, deleteImage, "imageName");
+        return result;
+      };
+
+      const updatePost = await Post.updateOne(
+        { _id: req.params.id },
+        {
+          $set: {
+            topic: topic,
+            detail: detail,
+            image: updateImage(),
+          },
+        }
+      );
+      res.json(updatePost);
+    });
   } catch (error) {
     res.json(error);
   }
@@ -156,16 +186,16 @@ router.post("/upload", async (req, res) => {
   }
 });
 
-let someArray = [
-  { imageName: "Kristian", url: "2,5,10" },
-  { imageName: "John", url: "1,19,26,96" },
-  { imageName: "tee", url: "2,58,160" },
-  { imageName: "Felix", url: "1,19,26,96" },
-];
+// let someArray = [
+//   { imageName: "Kristian", url: "2,5,10" },
+//   { imageName: "John", url: "1,19,26,96" },
+//   { imageName: "tee", url: "2,58,160" },
+//   { imageName: "Felix", url: "1,19,26,96" },
+// ];
 
-const deleteImage = [{ imageName: "Kristian"},{ imageName: "tee"}];
-const results = someArray.filter((image) => image.imageName !== "Kristian");
-var filteredArray = _.differenceBy(someArray, deleteImage, 'imageName');
-console.log("filtered", results);
-console.log("filteredArray", filteredArray);
+// const deleteImage = [{ imageName: "Kristian" }, { imageName: "tee" }];
+// const results = someArray.filter((image) => image.imageName !== "Kristian");
+// var filteredArray = _.differenceBy(someArray, deleteImage, "imageName");
+// console.log("filtered", results);
+// console.log("filteredArray", filteredArray);
 module.exports = router;
