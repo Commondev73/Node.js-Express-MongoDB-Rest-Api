@@ -161,6 +161,11 @@ router.delete("/:id", authenticateToken, async (req, res) => {
     const PostID = await Post.findById(req.params.id);
     if (PostID.userID !== decoded._id) return res.sendStatus(401);
 
+    PostID.image.map((file)=>{
+      const pathFile = path.join(__dirname, `../uploads/${file.imageName}`);
+      if (fs.existsSync(pathFile)) fs.unlinkSync(pathFile);
+    })
+
     const removedPost = await Post.remove({ _id: req.params.id });
     res.json(removedPost);
   } catch (error) {
@@ -168,23 +173,23 @@ router.delete("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.post("/upload", async (req, res) => {
-  try {
-    image(req, res, (err) => {
-      if (err) return res.status(400).json({ error: err.message });
+// router.post("/upload", async (req, res) => {
+//   try {
+//     image(req, res, (err) => {
+//       if (err) return res.status(400).json({ error: err.message });
 
-      const results = req.file ? "has file" : "no file";
-      // console.log("test", req.files);
-      const image = req.files.map((file) => file.path);
-      // console.log("file", req.file.path);
-      // res.send(req.file);
-      res.json(image);
-    });
-  } catch (error) {
-    console.log(error);
-    res.json(error);
-  }
-});
+//       const results = req.file ? "has file" : "no file";
+//       // console.log("test", req.files);
+//       const image = req.files.map((file) => file.path);
+//       // console.log("file", req.file.path);
+//       // res.send(req.file);
+//       res.json(image);
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.json(error);
+//   }
+// });
 
 // let someArray = [
 //   { imageName: "Kristian", url: "2,5,10" },
